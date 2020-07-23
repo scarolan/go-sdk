@@ -27,45 +27,12 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/toml"
+	"github.com/lacework/go-sdk/lwconfig"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-// Profiles is the representation of the ~/.lacework.toml
-//
-// Example:
-//
-// [default]
-// account = "example"
-// api_key = "EXAMPLE_0123456789"
-// api_secret = "_0123456789"
-//
-// [dev]
-// account = "dev"
-// api_key = "DEV_0123456789"
-// api_secret = "_0123456789"
-type Profiles map[string]credsDetails
-
-type credsDetails struct {
-	Account   string `toml:"account" json:"account"`
-	ApiKey    string `toml:"api_key" json:"api_key" survey:"api_key"`
-	ApiSecret string `toml:"api_secret" json:"api_secret" survey:"api_secret"`
-}
-
-func (c *credsDetails) Verify() error {
-	if c.Account == "" {
-		return errors.New("account missing")
-	}
-	if c.ApiKey == "" {
-		return errors.New("api_key missing")
-	}
-	if c.ApiSecret == "" {
-		return errors.New("api_secret missing")
-	}
-	return nil
-}
 
 // apiKeyDetails represents the details of an API key, we use this struct
 // internally to unmarshal the JSON file provided by the Lacework WebUI
@@ -182,31 +149,33 @@ func promptConfigureSetup() error {
 		Message: secretMessage,
 	}
 
-	newCreds := credsDetails{}
+	creds := lwconfig.ProfileDetails{}
 	if cli.InteractiveMode() {
-		err := survey.Ask(append(questions, secretQuest), &newCreds,
+		err := survey.Ask(append(questions, secretQuest), &creds,
 			survey.WithIcons(promptIconsFunc),
 		)
 		if err != nil {
 			return err
 		}
 
-		if len(newCreds.ApiSecret) == 0 {
-			newCreds.ApiSecret = cli.Secret
+		if len(creds.ApiSecret) == 0 {
+			creds.ApiSecret = cli.Secret
 		}
 		cli.OutputHuman("\n")
 	} else {
-		newCreds.Account = cli.Account
-		newCreds.ApiKey = cli.KeyID
-		newCreds.ApiSecret = cli.Secret
+		creds.Account = cli.Account
+		creds.ApiKey = cli.KeyID
+		creds.ApiSecret = cli.Secret
 	}
 
-	if err := newCreds.Verify(); err != nil {
+	if err := creds.Verify(); err != nil {
 		return errors.Wrap(err, "unable to configure the command-line")
 	}
 
 	var (
-		profiles = Profiles{}
+		err error
+		// @afiune this would have to be changed to lwconfig.Config{}
+		profiles = lwconfig.Profiles{}
 		buf      = new(bytes.Buffer)
 		confPath = viper.ConfigFileUsed()
 	)
@@ -222,19 +191,20 @@ func promptConfigureSetup() error {
 		)
 	} else {
 		cli.Log.Debugw("decoding config", "path", confPath)
-		if _, err := toml.DecodeFile(confPath, &profiles); err != nil {
-			return errors.Wrap(err, "unable to decode profiles from config")
+		profiles, err = lwconfig.LoadFromFile(confPath)
+		if err != nil {
+			return err
 		}
 		cli.Log.Debugw("profiles loaded from config, updating", "profiles", profiles)
 	}
 
-	profiles[cli.Profile] = newCreds
+	profiles[cli.Profile] = creds
 	cli.Log.Debugw("storing updated profiles", "profiles", profiles)
 	if err := toml.NewEncoder(buf).Encode(profiles); err != nil {
 		return err
 	}
 
-	err := ioutil.WriteFile(confPath, buf.Bytes(), 0600)
+	err = ioutil.WriteFile(confPath, buf.Bytes(), 0600)
 	if err != nil {
 		return err
 	}
