@@ -29,7 +29,7 @@ const (
 	apiIntegrationsByType  = "external/integrations/type/%s"
 	apiIntegrationFromGUID = "external/integrations/%s"
 	apiIntegrationSchema   = "external/integrations/schema/%s"
-	apiTokens              = "access/tokens"
+	apiTokens              = "access/token"
 
 	apiVulnerabilitiesContainerScan             = "external/vulnerabilities/container/repository/images/scan"
 	apiVulnerabilitiesContainerScanStatus       = "external/vulnerabilities/container/reqId/%s"
