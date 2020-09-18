@@ -91,11 +91,6 @@ func NewClient(account string, opts ...Option) (*Client, error) {
 		},
 		c: &http.Client{Timeout: defaultTimeout},
 	}
-	c.LQL = &LQLService{c}
-	c.Events = &EventsService{c}
-	c.Compliance = &ComplianceService{c}
-	c.Integrations = &IntegrationsService{c}
-	c.Vulnerabilities = NewVulnerabilityService(c)
 
 	// init logger, this could change if a user calls api.WithLogLevel()
 	c.initLogger()
@@ -105,6 +100,14 @@ func NewClient(account string, opts ...Option) (*Client, error) {
 			return c, err
 		}
 	}
+
+	//c.initServices()
+
+	c.LQL = &LQLService{c}
+	c.Events = &EventsService{c}
+	c.Compliance = &ComplianceService{c}
+	c.Integrations = &IntegrationsService{c}
+	c.Vulnerabilities = NewVulnerabilityService(c)
 
 	c.log.Info("api client created",
 		zap.String("url", c.baseURL.String()),
