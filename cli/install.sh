@@ -6,7 +6,7 @@ set -eou pipefail
 if [ -n "${LW_DEBUG:-}" ]; then set -x; fi
 
 readonly github_releases="https://github.com/lacework/go-sdk/releases"
-readonly installation_dir=/usr/local/bin
+#readonly installation_dir=/usr/local/bin
 readonly package_name=lacework-cli
 readonly binary_name=lacework
 
@@ -25,6 +25,7 @@ FLAGS:
     -h    Prints help information
     -v    Specifies a version (ex: v0.1.0)
     -t    Specifies the target of the program to download (default: linux-amd64)
+    -d    Specifies the installation directory (default: /usr/local/bin)
 USAGE
 }
 
@@ -44,7 +45,10 @@ main() {
       t)
         target="${OPTARG}"
         ;;
-      \?)
+      d)
+        installation_dir="${OPTARG}"
+        ;;
+       \?)
         echo "" >&2
         usage >&2
         exit_with "Invalid option" 1
