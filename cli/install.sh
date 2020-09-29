@@ -6,9 +6,10 @@ set -eou pipefail
 if [ -n "${LW_DEBUG:-}" ]; then set -x; fi
 
 readonly github_releases="https://github.com/lacework/go-sdk/releases"
-#readonly installation_dir=/usr/local/bin
 readonly package_name=lacework-cli
 readonly binary_name=lacework
+
+installation_dir=/usr/local/bin
 
 usage() {
   local _cmd
@@ -33,7 +34,7 @@ main() {
   version=""
 
   # Parse command line flags and options.
-  while getopts "c:hv:t:" opt; do
+  while getopts "c:hv:t:d:" opt; do
     case "${opt}" in
       h)
         usage
