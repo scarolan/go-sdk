@@ -1,10 +1,10 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.2.6`.
+Another day, another release. These are the release notes for the version `v0.2.7`.
 
 ## Features
-* feat(api): trigger initial report automatically (#230) (Salim Afiune)([1e24a22](https://github.com/lacework/go-sdk/commit/1e24a229d2f2c54b81809ccb156a9d4283962c32))
-## Documentation Updates
-* docs(cli): disable timestamp for automatic docs (#229) (Salim Afiune)([f4d7841](https://github.com/lacework/go-sdk/commit/f4d78417c307c38507995892999cb85e7be74cf2))
+* feat(cli): add ARM support (#236) (Salim Afiune)([821b8e6](https://github.com/lacework/go-sdk/commit/821b8e699e61eefda7d287a71b08ef26382a4ad7))
+## Other Changes
+* ci(fix) Update CI test node (#233) (Scott Ford)([ddbf86e](https://github.com/lacework/go-sdk/commit/ddbf86e8fbf9053af43bab9d57c04645383e529e))
 
 ## Docker Images
 * `docker pull lacework/lacework-cli:latest`
